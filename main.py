@@ -509,8 +509,12 @@ def combin_to_config(config, data):
                 po['outbounds'] = t_o
                 if po.get('filter'):
                     del po['filter']
+    seen_tags = set()
     for group in data:
-        temp_outbounds.extend(data[group])
+        for node in data[group]:
+            if node.get('tag') not in seen_tags:
+                seen_tags.add(node['tag'])
+                temp_outbounds.append(node)
     config['outbounds'] = config_outbounds + temp_outbounds
     # 自动配置路由规则到dns规则，避免dns泄露
     dns_tags = [server.get('tag') for server in config['dns']['servers']]
