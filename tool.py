@@ -257,16 +257,28 @@ def replaceStr(nodelist,keywords):
     return nodelist
 
 def proDuplicateNodeName(nodes):
-    names = []
+    # 第一轮：收集所有节点，记录 tag 改名映射，确保全局唯一
+    all_nodes = []
     for key in nodes.keys():
-        nodelist = nodes[key]
-        for node in nodelist:
-            index = 2
-            s = node['tag']
-            while node['tag'] in names:
-                node['tag'] = s + ' ' + str(index)
-                index += 1
-            names.append(node['tag'])
+        all_nodes.extend(nodes[key])
+
+    names = []
+    rename_map = {}  # 记录 旧tag -> 新tag 的映射，用于同步 detour
+    for node in all_nodes:
+        index = 2
+        original = node['tag']
+        while node['tag'] in names:
+            node['tag'] = original + ' ' + str(index)
+            index += 1
+        if node['tag'] != original:
+            rename_map[original] = node['tag']
+        names.append(node['tag'])
+
+    # 第二轮：同步更新所有节点的 detour 字段，避免引用失效导致 sing-box 报错
+    if rename_map:
+        for node in all_nodes:
+            if node.get('detour') and node['detour'] in rename_map:
+                node['detour'] = rename_map[node['detour']]
 
 def removeNodes(nodelist):
     newlist = []
