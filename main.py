@@ -478,14 +478,19 @@ def combin_to_config(config, data):
                         oo = oo[1:-1]
                         if data.get(oo):
                             nodes = data[oo]
-                            t_o.extend(pro_node_template(nodes, po, oo))
+                            for tag in pro_node_template(nodes, po, oo):
+                                if tag not in t_o:
+                                    t_o.append(tag)
                         else:
                             if oo == 'all':
                                 for group in data:
                                     nodes = data[group]
-                                    t_o.extend(pro_node_template(nodes, po, group))
+                                    for tag in pro_node_template(nodes, po, group):
+                                        if tag not in t_o:
+                                            t_o.append(tag)
                     else:
-                        t_o.append(oo)
+                        if oo not in t_o:
+                            t_o.append(oo)
                 if len(t_o) == 0:
                     t_o.append(direct_item['tag'])  # outbound内容为空时 添加直连 direct
                     print('发现 {} 出站下的节点数量为 0 ，会导致sing-box无法运行，请检查config模板是否正确。'.format(
