@@ -1,10 +1,4 @@
 {
-    "functions": {
-        "api/app.py": {
-            "runtime": "vercel-python@latest",
-            "maxDuration": 60
-        }
-    },
     "rewrites": [
         {
             "source": "/(.*)",
