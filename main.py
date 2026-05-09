@@ -183,11 +183,28 @@ def get_nodes(url):
         return processed_list
 
 
+# def parse_content(content):
+#     # firstline = tool.firstLine(content)
+#     # # print(firstline)
+#     # if not get_parser(firstline):
+#     #     return None
+#     nodelist = []
+#     for t in content.splitlines():
+#         t = t.strip()
+#         if len(t) == 0:
+#             continue
+#         factory = get_parser(t)
+#         if not factory:
+#             continue
+#         try:
+#             node = factory(t)
+#         except Exception as e:  #节点解析失败，跳过
+#             pass
+#         if node:
+#             nodelist.append(node)
+#     return nodelist
+
 def parse_content(content):
-    # firstline = tool.firstLine(content)
-    # # print(firstline)
-    # if not get_parser(firstline):
-    #     return None
     nodelist = []
     for t in content.splitlines():
         t = t.strip()
@@ -196,11 +213,12 @@ def parse_content(content):
         factory = get_parser(t)
         if not factory:
             continue
+        node = None                     # 先初始化为 None
         try:
             node = factory(t)
-        except Exception as e:  #节点解析失败，跳过
+        except Exception as e:          # 节点解析失败，跳过
             pass
-        if node:
+        if node:                        # 现在 node 始终存在，不会报错
             nodelist.append(node)
     return nodelist
 
