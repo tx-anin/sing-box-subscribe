@@ -136,9 +136,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Google",
@@ -149,9 +150,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Telegram",
@@ -162,9 +164,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Twitter",
@@ -175,9 +178,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Facebook",
@@ -188,17 +192,22 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "BiliBili",
       "type": "selector",
       "outbounds": [
-        "direct",
         "HongKong",
-        "TaiWan"
+        "Singapore",
+        "Japan",
+        "America",
+        "Others",
+        "Proxy",
+        "direct"
       ],
       "default": "direct"
     },
@@ -211,9 +220,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Spotify",
@@ -224,9 +234,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "TikTok",
@@ -237,9 +248,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Netflix",
@@ -250,8 +262,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
-      ]
+        "Proxy",
+        "direct"
+      ],
+      "default": "Proxy"
     },
     {
       "tag": "Disney+",
@@ -262,9 +276,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Apple",
@@ -276,7 +291,8 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
       "default": "direct"
     },
@@ -284,13 +300,13 @@
       "tag": "Microsoft",
       "type": "selector",
       "outbounds": [
-        "direct",
         "HongKong",
         "Singapore",
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
       "default": "direct"
     },
@@ -298,15 +314,15 @@
       "tag": "Games",
       "type": "selector",
       "outbounds": [
-        "direct",
         "HongKong",
         "Singapore",
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Streaming",
@@ -317,9 +333,10 @@
         "Japan",
         "America",
         "Others",
-        "Proxy"
+        "Proxy",
+        "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "Global",
@@ -333,7 +350,7 @@
         "Proxy",
         "direct"
       ],
-      "default": "America"
+      "default": "Proxy"
     },
     {
       "tag": "China",
