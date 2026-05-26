@@ -6,8 +6,8 @@
   "services": [
     {
       "type": "oom-killer",
-      "memory_limit": "45MiB",
-      "safety_margin": "10MiB"
+      "memory_limit": "35mb",
+      "safety_margin": "5mb"
     }
   ],
   "experimental": {
