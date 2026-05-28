@@ -18,7 +18,7 @@ def loop_color(text):
     return text
 
 
-def init_parsers():
+def init_parsers() -> None:
     b = os.walk('parsers')
     for path, dirs, files in b:
         for file in files:
@@ -27,20 +27,20 @@ def init_parsers():
                 parsers_mod[f[0]] = importlib.import_module('parsers.' + f[0])
 
 
-def get_template():
-    template_dir = 'config_template'  # 配置模板文件夹路径
-    template_files = os.listdir(template_dir)  # 获取文件夹中的所有文件
-    template_list = [os.path.splitext(file)[0] for file in template_files if
-                     file.endswith('.json')]  # 移除扩展名并过滤出以.json结尾的文件
-    template_list.sort()  # 对文件名进行排序
+def get_template() -> list:
+    template_dir = 'config_template'
+    template_files = os.listdir(template_dir)
+    template_list = sorted(
+        os.path.splitext(file)[0] for file in template_files if file.endswith('.json')
+    )
     return template_list
 
 
-def load_json(path):
+def load_json(path: str) -> dict:
     return json.loads(tool.readFile(path))
 
 
-def process_subscribes(subscribes):
+def process_subscribes(subscribes: list) -> dict:
     nodes = {}
     for subscribe in subscribes:
         if 'enabled' in subscribe and not subscribe['enabled']:
@@ -59,12 +59,11 @@ def process_subscribes(subscribes):
             nodes[subscribe['tag']] += _nodes
         else:
             print('没有在此订阅下找到节点，跳过')
-            # print('Không tìm thấy proxy trong link thuê bao này, bỏ qua')
     tool.proDuplicateNodeName(nodes)
     return nodes
 
 
-def nodes_filter(nodes, filter, group):
+def nodes_filter(nodes: list, filter: list, group: str) -> list:
     for a in filter:
         if a.get('for') and group not in a['for']:
             continue
@@ -72,7 +71,7 @@ def nodes_filter(nodes, filter, group):
     return nodes
 
 
-def action_keywords(nodes, action, keywords):
+def action_keywords(nodes: list, action: str, keywords: list) -> list:
     # filter将按顺序依次执行
     # "filter":[
     #         {"action":"include","keywords":[""]},
@@ -82,9 +81,7 @@ def action_keywords(nodes, action, keywords):
     flag = False
     if action == 'exclude':
         flag = True
-    '''
     # 空关键字过滤
-    '''
     # Join the patterns list into a single pattern, separated by '|'
     combined_pattern = '|'.join(keywords)
 
@@ -107,7 +104,7 @@ def action_keywords(nodes, action, keywords):
     return temp_nodes
 
 
-def add_prefix(nodes, subscribe):
+def add_prefix(nodes: list, subscribe: dict) -> None:
     if subscribe.get('prefix'):
         for node in nodes:
             node['tag'] = subscribe['prefix'] + node['tag']
@@ -115,7 +112,7 @@ def add_prefix(nodes, subscribe):
                 node['detour'] = subscribe['prefix'] + node['detour']
 
 
-def add_emoji(nodes, subscribe):
+def add_emoji(nodes: list, subscribe: dict) -> None:
     if subscribe.get('emoji'):
         for node in nodes:
             node['tag'] = tool.rename(node['tag'])
@@ -123,7 +120,7 @@ def add_emoji(nodes, subscribe):
                 node['detour'] = tool.rename(node['detour'])
 
 
-def nodefilter(nodes, subscribe):
+def nodefilter(nodes: list, subscribe: dict) -> None:
     if subscribe.get('ex-node-name'):
         ex_nodename = re.split(r'[,\|]', subscribe['ex-node-name'])
         for exns in ex_nodename:
@@ -132,7 +129,7 @@ def nodefilter(nodes, subscribe):
                     nodes.remove(node)
 
 
-def get_nodes(url):
+def get_nodes(url: str) -> list | None:
     if url.startswith('sub://'):
         url = tool.b64Decode(url[6:]).decode('utf-8')
     urlstr = urlparse(url)
@@ -183,28 +180,7 @@ def get_nodes(url):
         return processed_list
 
 
-# def parse_content(content):
-#     # firstline = tool.firstLine(content)
-#     # # print(firstline)
-#     # if not get_parser(firstline):
-#     #     return None
-#     nodelist = []
-#     for t in content.splitlines():
-#         t = t.strip()
-#         if len(t) == 0:
-#             continue
-#         factory = get_parser(t)
-#         if not factory:
-#             continue
-#         try:
-#             node = factory(t)
-#         except Exception as e:  #节点解析失败，跳过
-#             pass
-#         if node:
-#             nodelist.append(node)
-#     return nodelist
-
-def parse_content(content):
+def parse_content(content: str) -> list:
     nodelist = []
     for t in content.splitlines():
         t = t.strip()
@@ -223,7 +199,7 @@ def parse_content(content):
     return nodelist
 
 
-def get_parser(node):
+def get_parser(node: str):
     proto = tool.get_protocol(node)
     if providers.get('exclude_protocol'):
         eps = providers['exclude_protocol'].split(',')
@@ -242,9 +218,8 @@ def get_parser(node):
 def get_content_from_url(url, n=10):
     UA = ''
     print('处理: \033[31m' + url + '\033[0m')
-    # print('Đang tải link đăng ký: \033[31m' + url + '\033[0m')
-    prefixes = ["vmess://", "vless://", "ss://", "ssr://", "trojan://", "tuic://", "hysteria://", "hysteria2://",
-                "hy2://", "wg://", "wireguard://", "http2://", "socks://", "socks5://"]
+    prefixes = {"vmess://", "vless://", "ss://", "ssr://", "trojan://", "tuic://", "hysteria://", "hysteria2://",
+                "hy2://", "wg://", "wireguard://", "http2://", "socks://", "socks5://"}
     if any(url.startswith(prefix) for prefix in prefixes):
         response_text = tool.noblankLine(url)
         return response_text
@@ -257,13 +232,11 @@ def get_content_from_url(url, n=10):
     concount = 1
     while concount <= n and not response:
         print('连接出错，正在进行第 ' + str(concount) + ' 次重试，最多重试 ' + str(n) + ' 次...')
-        # print('Lỗi kết nối, đang thử lại '+str(concount)+'/'+str(n)+'...')
         response = tool.getResponse(url)
         concount = concount + 1
         time.sleep(1)
     if not response:
         print('获取错误，跳过此订阅')
-        # print('Lỗi khi tải link đăng ký, bỏ qua link đăng ký này')
         print('----------------------------')
         pass
     try:
@@ -274,7 +247,6 @@ def get_content_from_url(url, n=10):
         return ''
     if response_text.isspace():
         print('没有从订阅链接获取到任何内容')
-        # print('Không nhận được proxy nào từ link đăng ký')
         return None
     if not response_text:
         response = tool.getResponse(url, custom_user_agent='clashmeta')
@@ -312,9 +284,7 @@ def get_content_from_url(url, n=10):
 
 def get_content_form_file(url):
     print('处理: \033[31m' + url + '\033[0m')
-    # print('Đang tải link đăng ký: \033[31m' + url + '\033[0m')
-    # encoding = tool.get_encoding(url)
-    file_extension = os.path.splitext(url)[1]  # 获取文件的后缀名
+    file_extension = os.path.splitext(url)[1]
     if file_extension.lower() == '.yaml':
         with open(url, 'rb') as file:
             content = file.read()
@@ -341,14 +311,11 @@ def save_config(path, nodes):
         if os.path.exists(path):
             os.remove(path)
             print(f"已删除文件，并重新保存：\033[33m{path}\033[0m")
-            # print(f"File cấu hình đã được lưu vào: \033[33m{path}\033[0m")
         else:
             print(f"文件不存在，正在保存：\033[33m{path}\033[0m")
-            # print(f"File không tồn tại, đang lưu tại: \033[33m{path}\033[0m")
         tool.saveFile(path, json.dumps(nodes, indent=2, ensure_ascii=False))
     except Exception as e:
         print(f"保存配置文件时出错：{str(e)}")
-        # print(f"Lỗi khi lưu file cấu hình: {str(e)}")
         # 如果保存出错，尝试使用 config_file_path 再次保存
         config_path = json.loads(temp_json_data).get("save_config_path", "config.json")
         CONFIG_FILE_NAME = config_path
@@ -357,27 +324,16 @@ def save_config(path, nodes):
             if os.path.exists(config_file_path):
                 os.remove(config_file_path)
                 print(f"已删除文件，并重新保存：\033[33m{config_file_path}\033[0m")
-                # print(f"File cấu hình đã được lưu vào: \033[33m{config_file_path}\033[0m")
             else:
                 print(f"文件不存在，正在保存：\033[33m{config_file_path}\033[0m")
-                # print(f"File không tồn tại, đang lưu tại: \033[33m{config_file_path}\033[0m")
             tool.saveFile(config_file_path, json.dumps(nodes, indent=2, ensure_ascii=False))
-            # print(f"配置文件已保存到 {config_file_path}")
-            # print(f"Tập tin cấu hình đã được lưu vào {config_file_path}")
         except Exception as e:
             os.remove(config_file_path)
             print(f"已删除文件：\033[33m{config_file_path}\033[0m")
-            # print(f"Các file đã bị xóa: \033[33m{config_file_path}\033[0m")
             print(f"再次保存配置文件时出错：{str(e)}")
-            # print(f"Lỗi khi lưu lại file cấu hình: {str(e)}")
 
 
-def set_proxy_rule_dns(config):
-    # dns_template = {
-    #     "tag": "remote",
-    #     "address": "tls://1.1.1.1",
-    #     "detour": ""
-    # }
+def set_proxy_rule_dns(config: dict) -> None:
     config_rules = config['route']['rules']
     outbound_dns = []
     dns_rules = config['dns']['rules']
@@ -513,17 +469,6 @@ def combin_to_config(config, data):
                     t_o.append(direct_item['tag'])  # outbound内容为空时 添加直连 direct
                     print('发现 {} 出站下的节点数量为 0 ，会导致sing-box无法运行，请检查config模板是否正确。'.format(
                         po['tag']))
-                    # print('Sing-Box không chạy được vì không tìm thấy bất kỳ proxy nào trong outbound của {}. Vui lòng kiểm tra xem mẫu cấu hình có đúng không!!'.format(po['tag']))
-                    """
-                    config_path = json.loads(temp_json_data).get("save_config_path", "config.json")
-                    CONFIG_FILE_NAME = config_path
-                    config_file_path = os.path.join('/tmp', CONFIG_FILE_NAME)
-                    if os.path.exists(config_file_path):
-                        os.remove(config_file_path)
-                        print(f"已删除文件：{config_file_path}")
-                        # print(f"Các tập tin đã bị xóa: {config_file_path}")
-                    sys.exit()
-                    """
                 po['outbounds'] = t_o
                 if po.get('filter'):
                     del po['filter']
@@ -575,7 +520,6 @@ def select_config_template(tl, selected_template_index=None):
     if args.template_index is not None:
         uip = args.template_index
     else:
-        # print ('Nhập số để chọn mẫu cấu hình tương ứng (nhấn Enter để chọn mẫu cấu hình đầu tiên theo mặc định): ')
         uip = input('输入序号，载入对应config模板（直接回车默认选第一个配置模板）：')
         try:
             if uip == '':
@@ -583,13 +527,11 @@ def select_config_template(tl, selected_template_index=None):
             uip = int(uip)
             if uip < 1 or uip > len(tl):
                 print('输入了错误信息！重新输入')
-                # print('Nhập thông tin không chính xác! Vui lòng nhập lại')
                 return select_config_template(tl)
             else:
                 uip -= 1
         except:
             print('输入了错误信息！重新输入')
-            # print('Nhập thông tin không chính xác! Vui lòng nhập lại')
             return select_config_template(tl)
     return uip
 
@@ -618,7 +560,6 @@ if __name__ == '__main__':
     if providers.get('config_template'):
         config_template_path = providers['config_template']
         print('选择: \033[33m' + config_template_path + '\033[0m')
-        # print ('Mẫu cấu hình sử dụng: \033[33m' + template_list[uip] + '.json\033[0m')
         response = requests.get(providers['config_template'])
         response.raise_for_status()
         config = response.json()
@@ -626,13 +567,11 @@ if __name__ == '__main__':
         template_list = get_template()
         if len(template_list) < 1:
             print('没有找到模板文件')
-            # print('Không tìm thấy file mẫu')
             sys.exit()
         display_template(template_list)
         uip = select_config_template(template_list, selected_template_index=args.template_index)
         config_template_path = 'config_template/' + template_list[uip] + '.json'
         print('选择: \033[33m' + template_list[uip] + '.json\033[0m')
-        # print ('Mẫu cấu hình sử dụng: \033[33m' + template_list[uip] + '.json\033[0m')
         config = load_json(config_template_path)
     nodes = process_subscribes(providers["subscribes"])
 

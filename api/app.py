@@ -5,9 +5,7 @@ import os
 import sys
 import subprocess
 import tempfile
-import shutil
-import tempfile  # 导入 tempfile 模块
-from datetime import datetime, timedelta
+from datetime import datetime
 
 app = Flask(__name__, template_folder='../templates')  # 指定模板文件夹的路径
 app.secret_key = 'sing-box'  # 替换为实际的密钥
@@ -18,17 +16,7 @@ data_json['TEMP_JSON_DATA'] = '{"subscribes":[{"url":"URL","tag":"tag_1","enable
 # 获取系统默认的临时目录路径
 TEMP_DIR = tempfile.gettempdir()
 
-"""
-# 存储配置文件的过期时间（10分钟）
-config_expiry_time = None
-"""
 
-def cleanup_temp_config():
-    global config_expiry_time, config_file_path
-    if config_expiry_time and datetime.now() > config_expiry_time:
-        shutil.rmtree(os.path.dirname(config_file_path), ignore_errors=True)
-        config_expiry_time = None
-        config_file_path = None
 
 # 获取临时 JSON 数据
 def get_temp_json_data():
@@ -332,22 +320,6 @@ def clear_temp_json_data():
         flash(f'Có lỗi khi làm trống TEMP_JSON_DATA: {str(e)}', 'Lỗi!!!')
     return jsonify({'status': 'success'})
 
-"""
-@app.route('/download_config', methods=['GET'])
-def download_config():
-    try:
-        if config_file_path:
-            # 清理临时配置文件
-            #cleanup_temp_config()
 
-            # 使用send_file发送文件
-            return send_file(config_file_path, as_attachment=True)
-        else:
-            flash('配置文件不存在或已过期', 'error')
-            flash('File cấu hình không tồn tại hoặc đã hết hạn', 'Lỗi!!!')
-            return redirect(url_for('index'))
-    except Exception as e:
-        return str(e)  # 或者适当处理异常，例如返回一个错误页面
-"""
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
