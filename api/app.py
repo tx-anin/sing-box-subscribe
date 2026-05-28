@@ -258,7 +258,7 @@ def config(url):
             selected_template_index = str(int(file_param) - 1)
         if gh_proxy_param.isdigit():
             selected_gh_proxy_index = str(int(gh_proxy_param) - 1)
-        temp_json_data = json.dumps(json.dumps(temp_json_data, indent=4, ensure_ascii=False), indent=4, ensure_ascii=False)
+        temp_json_data = json.dumps(temp_json_data, indent=4, ensure_ascii=False)
         subprocess.check_call([sys.executable, 'main.py', '--template_index', selected_template_index, '--temp_json_data', temp_json_data, '--gh_proxy_index', selected_gh_proxy_index])
         CONFIG_FILE_NAME = json.loads(os.environ['TEMP_JSON_DATA']).get("save_config_path", "config.json")
         if CONFIG_FILE_NAME.startswith("./"):
@@ -292,7 +292,9 @@ def generate_config():
             flash('请选择一个配置模板', 'error')
             flash('Vui lòng chọn một mẫu cấu hình', 'Lỗi!!!')
             return redirect(url_for('index'))
-        temp_json_data = json.dumps(os.environ['TEMP_JSON_DATA'], indent=4, ensure_ascii=False)
+        temp_json_data = os.environ.get('TEMP_JSON_DATA')
+
+        #json.dumps(os.environ['TEMP_JSON_DATA'], indent=4, ensure_ascii=False)
         # 修改这里：执行main.py并传递模板序号作为命令行参数，如果未指定，则传递空字符串
         subprocess.check_call([sys.executable, 'main.py', '--template_index', selected_template_index, '--temp_json_data', temp_json_data])
         CONFIG_FILE_NAME = json.loads(os.environ['TEMP_JSON_DATA']).get("save_config_path", "config.json")
