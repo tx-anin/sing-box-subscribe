@@ -60,6 +60,7 @@ def clash2v2ray(share_link):
             "name": quote(share_link['name'], 'utf-8')
         }
         base_link = base64.b64encode("{cipher}:{password}".format(**ss_info).encode('utf-8')).decode('utf-8')
+        url_link = ''
         if share_link.get('plugin'):
             ss_info["plugin"] = share_link['plugin']
             if share_link.get('plugin') == 'obfs' or share_link.get('plugin') == 'obfs-local':
