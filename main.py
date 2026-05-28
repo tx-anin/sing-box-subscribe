@@ -605,7 +605,7 @@ def parse_json(value):
 if __name__ == '__main__':
     init_parsers()
     parser = argparse.ArgumentParser()
-    parser.add_argument('--temp_json_data', type=parse_json, help='临时内容')
+    parser.add_argument('--temp_json_data', help='临时内容')
     parser.add_argument('--template_index', type=int, help='模板序号')
     parser.add_argument('--gh_proxy_index', type=str, help='github加速链接')
     args = parser.parse_args()
