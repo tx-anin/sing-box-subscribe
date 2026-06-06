@@ -528,6 +528,13 @@
         "action": "reject"
       },
       {
+        "rule_set": [
+          "geoip-cn",
+          "geosite-cn"
+        ],
+        "action": "direct"
+      },
+      {
         "clash_mode": "direct",
         "outbound": "direct"
       },
@@ -638,13 +645,6 @@
       {
         "rule_set": "geosite-geolocation-!cn",
         "outbound": "Global"
-      },
-      {
-        "rule_set": [
-          "geoip-cn",
-          "geosite-cn"
-        ],
-        "outbound": "direct"
       }
     ],
     "rule_set": [
