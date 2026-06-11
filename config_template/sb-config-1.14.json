@@ -22,11 +22,11 @@
     "cache_file": {
       "enabled": true,
       "store_fakeip": true,
-      "store_dns": false
+      "store_dns": true
     },
     "debug": {
-      "gc_percent": 10,
-      "memory_limit": 14680064
+      "gc_percent": 15,
+      "memory_limit": 15728640
     }
   },
   "dns": {
@@ -79,14 +79,6 @@
         "server": "ggdns"
       },
       {
-        "domain_keyword": [
-          "bodian",
-          "kuwo",
-          "wenyu"
-        ],
-        "server": "alidns"
-      },
-      {
         "rule_set": "geosite-cn",
         "server": "alidns"
       },
@@ -96,6 +88,15 @@
           "AAAA"
         ],
         "server": "fakeip"
+      },
+      {
+        "action": "evaluate",
+        "server": "alidns"
+      },
+      {
+        "match_response": true,
+        "rule_set": "geoip-cn",
+        "action": "respond"
       }
     ],
     "final": "ggdns",
@@ -527,21 +528,8 @@
         "action": "reject"
       },
       {
-        "domain_keyword": [
-          "bodian",
-          "kuwo",
-          "wenyu"
-        ],
-        "outbound": "China"
-      },
-      {
-        "package_name": [
-          "cn.wenyu.bodian"
-        ],
-        "outbound": "China"
-      },
-      {
         "rule_set": [
+          "geoip-cn",
           "geosite-cn"
         ],
         "outbound": "China"
@@ -653,12 +641,6 @@
           "geosite-primevideo"
         ],
         "outbound": "Streaming"
-      },
-      {
-        "rule_set": [
-          "geoip-cn"
-        ],
-        "outbound": "China"
       },
       {
         "rule_set": "geosite-geolocation-!cn",
