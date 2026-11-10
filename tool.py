@@ -1,17 +1,14 @@
 import base64,requests,random,string,re,chardet,urllib.parse
-import warnings
-from cryptography.utils import CryptographyDeprecationWarning
-with warnings.catch_warnings(action="ignore", category=CryptographyDeprecationWarning):
-    import paramiko
-from scp import SCPClient
 
-def get_encoding(file: str) -> str:
-    with open(file, 'rb') as f:
+
+def get_encoding(file):
+    with open(file,'rb') as f:
         return chardet.detect(f.read())['encoding']
-
-def saveFile(path: str, content: str) -> None:
-    with open(path, 'w', encoding='utf-8') as f:
-        f.write(content)
+    
+def saveFile(path,content):
+    file = open(path, mode='w',encoding='utf-8')
+    file.write(content)
+    file.close()
 
 regex_patterns = {
     '🇭🇰': re.compile(r'香港|沪港|呼港|中港|HKT|HKBN|HGC|WTT|CMI|穗港|广港|京港|🇭🇰|HK|Hongkong|Hong Kong|HongKong|HONG KONG'),
@@ -157,48 +154,57 @@ regex_patterns = {
     '🇦🇶': re.compile(r'南极|南極|(\s|-)?AQ\d*|Antarctica'),
     '🇨🇳': re.compile(r'中国|中國|江苏|北京|上海|广州|深圳|杭州|徐州|青岛|宁波|镇江|沈阳|济南|回国|back|(\s|-)?CN(?!2GIA)\d*|China'),
 }
-_country_items = list(regex_patterns.items())
-_combined_regex = re.compile(
-    '|'.join(f'(?P<c{i}>{p.pattern})' for i, (_, p) in enumerate(_country_items))
-)
-
-def rename(input_str: str) -> str:
-    for country_code, _ in _country_items:
+def rename(input_str):
+    for country_code, pattern in regex_patterns.items():
         if input_str.startswith(country_code):
-            return f'{country_code} {input_str[len(country_code):].strip()}'
-    m = _combined_regex.search(input_str)
-    if m:
-        for i, (country_code, _) in enumerate(_country_items):
-            if m.group(f'c{i}'):
-                return f'{country_code} {input_str}'
+            return country_code + ' ' + input_str[len(country_code):].strip()
+        if pattern.search(input_str):
+            if input_str.startswith('🇺🇲'):
+                return country_code + ' ' + input_str[len('🇺🇲'):].strip()
+            else:
+                return country_code + ' ' + input_str
     return input_str
 
-def b64Decode(s: str) -> bytes:
-    s = urllib.parse.unquote(s.strip())
-    s += (len(s) % 4) * '='
-    return base64.urlsafe_b64decode(s)
+def b64Decode(str):
+    str = urllib.parse.unquote(str.strip())
+    str += (len(str)%4)*'='
+    return base64.urlsafe_b64decode(str)
 
-def readFile(path: str) -> bytes:
-    with open(path, 'rb') as f:
-        return f.read()
+def readFile(path):
+    file = open(path,'rb')
+    content = file.read()
+    file.close()
+    return content
 
-def noblankLine(data: str) -> str:
-    stripped_lines = [l.strip() for l in data.splitlines() if l.strip()]
-    return '\n'.join(stripped_lines)
+def noblankLine(data):
+    lines = data.splitlines()
+    newdata = ''
+    for index in range(len(lines)):
+        line = lines[index]
+        t = line.strip()
+        if len(t)>0:
+            newdata += t
+            if index+1<len(lines):
+                newdata += '\n'
+    return newdata
 
-def firstLine(data: str) -> str | None:
-    for line in data.splitlines():
+def firstLine(data):
+    lines = data.splitlines()
+    for line in lines:
         line = line.strip()
         if line:
             return line
 
-def genName(length: int = 8) -> str:
-    return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+def genName(length=8):
+    name = ''
+    for i in range(length):
+        name += random.choice(string.ascii_letters+string.digits)
+    return name
 
-def is_ip(s: str) -> re.Match | None:
-    return re.search(r'^\d+\.\d+\.\d+\.\d+$', s)
+def is_ip(str):
+    return re.search(r'^\d+\.\d+\.\d+\.\d+$',str)
 
-def get_protocol(s: str) -> str | None:
+def get_protocol(s):
     try:
         m = re.search(r'^(.+?)://', s)
     except Exception as e:
@@ -218,87 +224,82 @@ def get_protocol(s: str) -> str | None:
             m = re.search(r'^(.+?)://', s)
         return m.group(1)
 
-def checkKeywords(keywords: list[str], s: str) -> bool:
+def checkKeywords(keywords,str):
     if not keywords:
         return False
-    for kw in keywords:
-        if kw in s:
+    for keyword in keywords:
+        if str.find(keyword)>-1:
             return True
     return False
 
-def filterNodes(nodelist: list[dict], keywords: list[str]) -> list[dict]:
+def filterNodes(nodelist,keywords):
+    newlist = []
     if not keywords:
         return nodelist
-    newlist = []
     for node in nodelist:
-        if not checkKeywords(keywords, node['name']):
+        if not checkKeywords(keywords,node['name']):
             newlist.append(node)
         else:
-            print('过滤节点名称 ' + node['name'])
+            print('过滤节点名称 '+node['name'])
+            print('Lọc tên proxy'+node['name'])
     return newlist
 
-def replaceStr(nodelist: list[dict], keywords: list[str]) -> list[dict]:
+def replaceStr(nodelist,keywords):
     if not keywords:
         return nodelist
     for node in nodelist:
         for k in keywords:
-            node['name'] = node['name'].replace(k, '').strip()
+            node['name'] = node['name'].replace(k,'').strip()
     return nodelist
 
-def proDuplicateNodeName(nodes: dict) -> None:
-    all_nodes = []
+def proDuplicateNodeName(nodes):
+    names = []
     for key in nodes.keys():
-        all_nodes.extend(nodes[key])
+        nodelist = nodes[key]
+        for node in nodelist:
+            index = 2
+            s = node['tag']
+            while node['tag'] in names:
+                node['tag'] = s + ' ' + str(index)
+                index += 1
+            names.append(node['tag'])
 
-    seen: set[str] = set()
-    rename_map: dict[str, str] = {}
-    for node in all_nodes:
-        index = 2
-        original = node['tag']
-        while node['tag'] in seen:
-            node['tag'] = f'{original} {index}'
-            index += 1
-        if node['tag'] != original:
-            rename_map[original] = node['tag']
-        seen.add(node['tag'])
-
-    if rename_map:
-        for node in all_nodes:
-            if node.get('detour') and node['detour'] in rename_map:
-                node['detour'] = rename_map[node['detour']]
-
-def removeNodes(nodelist: list[dict]) -> list[dict]:
+def removeNodes(nodelist):
     newlist = []
-    temp_list = []
-    i = 0
+    temp_list=[]
+    i=0
     for node in nodelist:
-        _node = {'server': node['server'], 'port': node['port']}
+        _node = {'server':node['server'],'port':node['port']}
         if _node in temp_list:
-            i += 1
+            i+=1
         else:
             temp_list.append(_node)
             newlist.append(node)
-    print(f'去除了 {i} 个重复节点，实际获取 {len(newlist)} 个节点')
+    print('去除了 '+str(i)+' 个重复节点')
+    print('Đã xóa các proxy trùng lặp '+str(i))
+    print('实际获取 '+str(len(newlist))+' 个节点')
+    print('Thực tế nhận được '+str(len(newlist))+' proxy')
     return newlist
 
-def prefixStr(nodelist: list[dict], prestr: str) -> list[dict]:
+def prefixStr(nodelist,prestr):
     for node in nodelist:
-        node['name'] = prestr + node['name'].strip()
+        node['name'] = prestr+node['name'].strip()
     return nodelist
 
-DEFAULT_UA = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
-              'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15')
-
-
-def getResponse(url: str, custom_user_agent: str | None = None) -> requests.Response | None:
-    headers = {'User-Agent': custom_user_agent or DEFAULT_UA}
+def getResponse(url, custom_user_agent=None):
+    response = None
+    headers = {
+        'User-Agent': custom_user_agent if custom_user_agent else 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15'
+        #'User-Agent': 'clash.meta'
+    }
     try:
-        response = requests.get(url, headers=headers, timeout=5)
-        if response.status_code == 200:
+        response = requests.get(url,headers=headers,timeout=5000)
+        if response.status_code==200:
             return response
-    except requests.RequestException:
-        pass
-    return None
+        else:
+            return None
+    except:
+        return None
     
 class ConfigSSH:
     server = {'ip':None,'port':22,'user':None,'password':''}
@@ -309,6 +310,7 @@ class ConfigSSH:
             if k in server.keys():
                 self.server[k] = server[k]
     def connect(self):
+        import paramiko
         ssh = paramiko.SSHClient()
         ssh.load_system_host_keys()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -320,10 +322,12 @@ class ConfigSSH:
         print(stdout.read().decode('utf-8')) 
 
     def uploadFile(self,source:str,target:str):
+        from scp import SCPClient
         scp = SCPClient(self.ssh.get_transport())
         scp.put(source, recursive=True, remote_path=target)
 
     def getFile(self,remote:str,local:str):
+        from scp import SCPClient
         scp = SCPClient(self.ssh.get_transport())
         scp.get(remote,local)
 

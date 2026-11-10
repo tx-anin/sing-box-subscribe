@@ -5,18 +5,30 @@ import os
 import sys
 import subprocess
 import tempfile
-from datetime import datetime
+import shutil
+import tempfile  # 导入 tempfile 模块
+from datetime import datetime, timedelta
 
 app = Flask(__name__, template_folder='../templates')  # 指定模板文件夹的路径
 app.secret_key = 'sing-box'  # 替换为实际的密钥
 data_json = {}
-os.environ['TEMP_JSON_DATA'] = '{"subscribes":[{"url":"URL","tag":"tag_1","enabled":true,"emoji":1,"subgroup":"","prefix":"","User-Agent":"v2rayng"},{"url":"URL","tag":"tag_2","enabled":false,"emoji":0,"subgroup":"命名/named","prefix":"❤️","User-Agent":"clashmeta"}],"auto_set_outbounds_dns":{"proxy":"","direct":""},"save_config_path":"./config.json","auto_backup":false,"exclude_protocol":"ssr","config_template":"","Only-nodes":false}'
-data_json['TEMP_JSON_DATA'] = '{"subscribes":[{"url":"URL","tag":"tag_1","enabled":true,"emoji":1,"subgroup":"","prefix":"","User-Agent":"v2rayng"},{"url":"URL","tag":"tag_2","enabled":false,"emoji":0,"subgroup":"命名/named","prefix":"❤️","User-Agent":"clashmeta"}],"auto_set_outbounds_dns":{"proxy":"","direct":""},"save_config_path":"./config.json","auto_backup":false,"exclude_protocol":"ssr","config_template":"","Only-nodes":false}'
+os.environ['TEMP_JSON_DATA'] = '{"subscribes":[{"url":"URL","tag":"tag_1","enabled":true,"emoji":1,"subgroup":"","prefix":"","User-Agent":"clash.meta"},{"url":"URL","tag":"tag_2","enabled":false,"emoji":0,"subgroup":"命名/named","prefix":"❤️","User-Agent":"clashmeta"}],"auto_set_outbounds_dns":{"proxy":"","direct":""},"save_config_path":"./config.json","auto_backup":false,"exclude_protocol":"ssr","config_template":"","Only-nodes":false}'
+data_json['TEMP_JSON_DATA'] = '{"subscribes":[{"url":"URL","tag":"tag_1","enabled":true,"emoji":1,"subgroup":"","prefix":"","User-Agent":"clash.meta"},{"url":"URL","tag":"tag_2","enabled":false,"emoji":0,"subgroup":"命名/named","prefix":"❤️","User-Agent":"clashmeta"}],"auto_set_outbounds_dns":{"proxy":"","direct":""},"save_config_path":"./config.json","auto_backup":false,"exclude_protocol":"ssr","config_template":"","Only-nodes":false}'
 
 # 获取系统默认的临时目录路径
 TEMP_DIR = tempfile.gettempdir()
 
+"""
+# 存储配置文件的过期时间（10分钟）
+config_expiry_time = None
+"""
 
+def cleanup_temp_config():
+    global config_expiry_time, config_file_path
+    if config_expiry_time and datetime.now() > config_expiry_time:
+        shutil.rmtree(os.path.dirname(config_file_path), ignore_errors=True)
+        config_expiry_time = None
+        config_file_path = None
 
 # 获取临时 JSON 数据
 def get_temp_json_data():
@@ -108,7 +120,7 @@ def config(url):
                         content_type='application/json; charset=utf-8', status=403)
     # temp_json_data_str = os.environ['TEMP_JSON_DATA']
     # temp_json_data = json.loads(temp_json_data_str)
-    temp_json_data = json.loads('{"subscribes":[{"url":"URL","tag":"tag_1","enabled":true,"emoji":1,"subgroup":"","prefix":"","ex-node-name": "","User-Agent":"v2rayng"},{"url":"URL","tag":"tag_2","enabled":false,"emoji":1,"subgroup":"","prefix":"","ex-node-name": "","User-Agent":"v2rayng"},{"url":"URL","tag":"tag_3","enabled":false,"emoji":1,"subgroup":"","prefix":"","ex-node-name": "","User-Agent":"v2rayng"}],"auto_set_outbounds_dns":{"proxy":"","direct":""},"save_config_path":"./config.json","auto_backup":false,"exclude_protocol":"ssr","config_template":"","Only-nodes":false}')
+    temp_json_data = json.loads('{"subscribes":[{"url":"URL","tag":"tag_1","enabled":true,"emoji":1,"subgroup":"","prefix":"","ex-node-name": "","User-Agent":"clash.meta"},{"url":"URL","tag":"tag_2","enabled":false,"emoji":1,"subgroup":"","prefix":"","ex-node-name": "","User-Agent":"clash.meta"},{"url":"URL","tag":"tag_3","enabled":false,"emoji":1,"subgroup":"","prefix":"","ex-node-name": "","User-Agent":"clash.meta"}],"auto_set_outbounds_dns":{"proxy":"","direct":""},"save_config_path":"./config.json","auto_backup":false,"exclude_protocol":"ssr","config_template":"","Only-nodes":false}')
     subscribe = temp_json_data['subscribes'][0]
     subscribe2 = temp_json_data['subscribes'][1]
     subscribe3 = temp_json_data['subscribes'][2]
@@ -221,7 +233,7 @@ def config(url):
         subscribe2['subgroup'] = ''
         subscribe2['prefix'] = ''
         subscribe2['ex-node-name'] = enn_param
-        subscribe2['User-Agent'] = 'v2rayng'
+        subscribe2['User-Agent'] = 'clash.meta'
         if len(url_parts) == 3:
             subscribe3['url'] = full_url.split('url=', 1)[-1].split('|')[2] if full_url.startswith('url') else full_url.split('|')[2]
             subscribe3['enabled'] = True
@@ -232,7 +244,7 @@ def config(url):
         subscribe['tag'] = tag_param if tag_param else subscribe.get('tag', '')
         subscribe['prefix'] = pre_param if pre_param else subscribe.get('prefix', '')
         subscribe['ex-node-name'] = enn_param
-        subscribe['User-Agent'] = ua_param if ua_param else 'v2rayng'
+        subscribe['User-Agent'] = ua_param if ua_param else 'clash.meta'
     temp_json_data['exclude_protocol'] = eps_param if eps_param else temp_json_data.get('exclude_protocol', '')
     temp_json_data['config_template'] = unquote(file_param) if file_param else temp_json_data.get('config_template', '')
     #print (f"Custom Page for {url} with link={full_url}, emoji={emoji_param}, file={file_param}, tag={tag_param}, UA={ua_param}, prefix={pre_param}")
@@ -246,7 +258,7 @@ def config(url):
             selected_template_index = str(int(file_param) - 1)
         if gh_proxy_param.isdigit():
             selected_gh_proxy_index = str(int(gh_proxy_param) - 1)
-        temp_json_data = json.dumps(temp_json_data, indent=4, ensure_ascii=False)
+        temp_json_data = json.dumps(json.dumps(temp_json_data, indent=4, ensure_ascii=False), indent=4, ensure_ascii=False)
         subprocess.check_call([sys.executable, 'main.py', '--template_index', selected_template_index, '--temp_json_data', temp_json_data, '--gh_proxy_index', selected_gh_proxy_index])
         CONFIG_FILE_NAME = json.loads(os.environ['TEMP_JSON_DATA']).get("save_config_path", "config.json")
         if CONFIG_FILE_NAME.startswith("./"):
@@ -280,9 +292,7 @@ def generate_config():
             flash('请选择一个配置模板', 'error')
             flash('Vui lòng chọn một mẫu cấu hình', 'Lỗi!!!')
             return redirect(url_for('index'))
-        temp_json_data = os.environ.get('TEMP_JSON_DATA')
-
-        #json.dumps(os.environ['TEMP_JSON_DATA'], indent=4, ensure_ascii=False)
+        temp_json_data = json.dumps(os.environ['TEMP_JSON_DATA'], indent=4, ensure_ascii=False)
         # 修改这里：执行main.py并传递模板序号作为命令行参数，如果未指定，则传递空字符串
         subprocess.check_call([sys.executable, 'main.py', '--template_index', selected_template_index, '--temp_json_data', temp_json_data])
         CONFIG_FILE_NAME = json.loads(os.environ['TEMP_JSON_DATA']).get("save_config_path", "config.json")
@@ -320,6 +330,22 @@ def clear_temp_json_data():
         flash(f'Có lỗi khi làm trống TEMP_JSON_DATA: {str(e)}', 'Lỗi!!!')
     return jsonify({'status': 'success'})
 
+"""
+@app.route('/download_config', methods=['GET'])
+def download_config():
+    try:
+        if config_file_path:
+            # 清理临时配置文件
+            #cleanup_temp_config()
 
+            # 使用send_file发送文件
+            return send_file(config_file_path, as_attachment=True)
+        else:
+            flash('配置文件不存在或已过期', 'error')
+            flash('File cấu hình không tồn tại hoặc đã hết hạn', 'Lỗi!!!')
+            return redirect(url_for('index'))
+    except Exception as e:
+        return str(e)  # 或者适当处理异常，例如返回一个错误页面
+"""
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
