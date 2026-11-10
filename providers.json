@@ -1,12 +1,12 @@
 {
     "subscribes": [
         {
-            "url": "URL",
+            "url": "https://fa.zmxoo.xyz/subapi",
             "tag": "tag_1",
-            "enabled": false,
+            "enabled": true,
             "emoji": 0,
-            "subgroup": "命名/named",
-            "prefix": "❤️",
+            "subgroup": "",
+            "prefix": "",
             "User-Agent": "clashmeta"
         },
         {
