@@ -1,7 +1,7 @@
 {
     "subscribes": [
         {
-            "url": "https://fa.zmxoo.xyz/subapi",
+            "url": "URL",
             "tag": "tag_1",
             "enabled": true,
             "emoji": 0,
