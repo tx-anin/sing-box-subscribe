@@ -7,7 +7,7 @@
             "emoji": 1,
             "subgroup": "",
             "prefix": "",
-            "User-Agent":"clash.meta"
+            "User-Agent": "clash.meta"
         },
         {
             "url": "URL",
@@ -16,16 +16,16 @@
             "emoji": 0,
             "subgroup": "命名/named",
             "prefix": "❤️",
-            "User-Agent":"clashmeta"
+            "User-Agent": "clashmeta"
         }
     ],
-    "auto_set_outbounds_dns":{
+    "auto_set_outbounds_dns": {
         "proxy": "",
         "direct": ""
     },
     "save_config_path": "./config.json",
     "auto_backup": false,
-    "exclude_protocol":"ssr",
+    "exclude_protocol": "ssr",
     "config_template": "",
     "Only-nodes": false
 }
